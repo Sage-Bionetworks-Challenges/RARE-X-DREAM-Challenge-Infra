@@ -2,7 +2,8 @@ FROM python:3.10-slim-buster
 
 WORKDIR /usr/local/bin
 
-RUN python3 -m pip install -U pandas numpy scikit-learn
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY base_model.py .
 
