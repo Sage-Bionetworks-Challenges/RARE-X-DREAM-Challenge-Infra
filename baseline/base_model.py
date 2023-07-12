@@ -132,14 +132,17 @@ def process_raw_data(input_dir, diseases):
     os.makedirs("tmp", exist_ok=True)
     training_features.to_csv(
         'tmp/training_features.tsv', sep='\t', index=False)
-    testing_features.to_csv('tmp/testing_features.tsv', sep='\t', index=False)
+    
+    os.makedirs("test", exist_ok=True)
+    testing_features.to_csv('test/testing_features.tsv', sep='\t', index=False)
+    
     pd.DataFrame({'Participant_ID': training_features['Participant_ID'].values, 'Disease_Name': training_target}).to_csv(
         'tmp/training_target.tsv', sep='\t', index=False)
 
 
 def predict():
     training_features = pd.read_table('tmp/training_features.tsv')
-    testing_features = pd.read_table('tmp/testing_features.tsv')
+    testing_features = pd.read_table('test/testing_features.tsv')
     training_target = pd.read_table(
         'tmp/training_target.tsv')['Disease_Name'].values
 
