@@ -129,17 +129,21 @@ def process_raw_data(input_dir, diseases):
     training_features, testing_features, training_target, _ = \
         train_test_split(features, tpot_data['Disease_Name'], random_state=0)
 
-    os.makedirs("tmp", exist_ok=True)
+    dir_list = "tmp", "test"
+    
+    for name in dir_list:
+        os.makedirs(name, exist_ok=True)
+
     training_features.to_csv(
         'tmp/training_features.tsv', sep='\t', index=False)
-    testing_features.to_csv('tmp/testing_features.tsv', sep='\t', index=False)
+    testing_features.to_csv('test/testing_features.tsv', sep='\t', index=False)
     pd.DataFrame({'Participant_ID': training_features['Participant_ID'].values, 'Disease_Name': training_target}).to_csv(
         'tmp/training_target.tsv', sep='\t', index=False)
 
 
 def predict():
     training_features = pd.read_table('tmp/training_features.tsv')
-    testing_features = pd.read_table('tmp/testing_features.tsv')
+    testing_features = pd.read_table('test/testing_features.tsv')
     training_target = pd.read_table(
         'tmp/training_target.tsv')['Disease_Name'].values
 
