@@ -31,6 +31,7 @@ outputs: {}
 steps:
 
   validate:
+    doc: Validate submission, which is expected to be a Synapse Project
     run: writeup-workflow/validate.cwl
     in:
       - id: synapse_config
@@ -47,6 +48,7 @@ steps:
       - id: invalid_reasons
   
   email_validation:
+    doc: Send validation results to submitter
     run: steps/task1_email.cwl
     in:
       - id: submissionid
@@ -60,7 +62,9 @@ steps:
     out: [finished]
 
   annotate_validation_with_output:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/annotate_submission.cwl
+    doc: Add `submission_status` and `submission_errors` annotations to submission
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/annotate_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
