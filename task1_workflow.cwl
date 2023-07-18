@@ -64,7 +64,7 @@ steps:
   annotate_validation_with_output:
     doc: Add `submission_status` and `submission_errors` annotations to submission
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/annotate_submission.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/annotate_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
