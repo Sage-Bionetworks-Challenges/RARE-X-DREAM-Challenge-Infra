@@ -170,6 +170,7 @@ def predict():
 
 
 def main(input_dir: str = '/input',
+         test_dir: str = '/test',
          output_dir: str = '/output'):
     select_diseases = [
         'Wiedemann-Steiner Syndrome (WSS)',
