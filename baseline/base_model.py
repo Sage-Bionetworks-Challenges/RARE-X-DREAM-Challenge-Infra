@@ -137,7 +137,6 @@ def train(df):
         - impute missing values
         - apply other transforms
     """
-    # NOTE: Make sure that the outcome column is labeled 'target' in the data file
     training_features = df.drop('Disease_Name', axis=1)
     training_target = df['Disease_Name']
 
@@ -190,7 +189,7 @@ def main(input_dir: str = '/input',
     imputer, model = train(input_data_df)
 
     # Using trained model, run inference.
-    test_data, *_ = process_raw_data(test_dir)
+    test_data, _ = process_raw_data(test_dir)
     testing_features = (
         test_data.reindex(columns=input_data.columns)
         .groupby('Participant_ID')
