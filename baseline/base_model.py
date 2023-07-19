@@ -13,20 +13,18 @@ from sklearn.impute import SimpleImputer
 
 
 def parse_series(X, col):
-    # Concatenate all strings in the series into a single string
+    # Concatenate all strings in the series into a single string.
     series = X[col]
     string = (','.join(series.dropna().tolist())
               .replace('[', '')
               .replace(']', '')
               .replace('"', ''))
 
-    # Split the string into individual values and keep the unique values
+    # Split the string into individual values and keep the unique values.
     unique_values = set(string.split(','))
 
-    # Create an empty dictionary to store indicator column values
+    # Create indicator columns for each unique value.
     indicator_columns = {}
-
-    # Create indicator columns for each unique value
     for value in unique_values:
         if value:
             indicator_columns[col + ':' + value] = [
@@ -35,18 +33,18 @@ def parse_series(X, col):
                 for v in series
             ]
 
-    # Create a pandas DataFrame from the indicator columns
+    # Create a pandas DataFrame from the indicator columns.
     df = pd.DataFrame(indicator_columns)
     return df
 
 
 def process_raw_data(input_dir):
-    """Clean and parse for specific data from raw data."""
+    """Clean and parse for select rows/columns from raw data."""
 
     # Concatenate all files into single dataframe.
     dfs = {}
     gen = {}
-    for tsv in glob.glob(os.path.join(input_dir, "*")):
+    for tsv in glob.glob(os.path.join(input_dir, "*.tsv")):
         df = pd.read_table(tsv)
         if (os.path.basename(tsv) == 'Disease_ID.tsv'):
             gen[os.path.basename(tsv)] = df
@@ -137,21 +135,21 @@ def train(df):
         - impute missing values
         - apply other transforms
     """
-    training_features = df.drop('Disease_Name', axis=1)
-    training_target = df['Disease_Name']
-
-    imputer = SimpleImputer(strategy="median")
-    imputer.fit(training_features)
-    training_featuresx = imputer.transform(training_features)
+    features = df.drop('Disease_Name', axis=1)
+    target = df['Disease_Name']
 
     exported_pipeline = RandomForestClassifier(
         bootstrap=False, criterion="gini", max_features=0.2,
         min_samples_leaf=5, min_samples_split=4, n_estimators=100)
-    # Fix random state in exported estimator
+
+    # Fix random state in estimator before fitting.
     if hasattr(exported_pipeline, 'random_state'):
         setattr(exported_pipeline, 'random_state', 42)
 
-    exported_pipeline.fit(training_featuresx, np.ravel(training_target))
+    imputer = SimpleImputer(strategy="median")
+    imputer.fit(features)
+    training_featuresx = imputer.transform(features)
+    exported_pipeline.fit(training_featuresx, np.ravel(target))
     return imputer, exported_pipeline
 
 
@@ -159,23 +157,24 @@ def main(input_dir: str = '/input',
          test_dir: str = '/test',
          output_dir: str = '/output'):
     """Main function."""
-    select_diseases = [
-        'Wiedemann-Steiner Syndrome (WSS)',
-        'STXBP1 related Disorders',
-        'FOXP1 Syndrome',
-        'Kleefstra syndrome',
-        'CHD2 related disorders',
-        'CACNA1A related disorders',
-        'Malan Syndrome',
-        'SYNGAP1 related disorders',
-        'CASK-Related Disorders',
-        'HUWE1-related disorders',
-        'AHC (Alternating Hemiplegia of Childhood)',
-        'Classic homocystinuria',
-        '8p-related disorders',
-        'CHAMP1 related disorders',
-        'DYRK1A Syndrome',
-        '4H Leukodystrophy']
+
+    # Diseases of interest for challenge task.
+    select_diseases = ['Wiedemann-Steiner Syndrome (WSS)',
+                       'STXBP1 related Disorders',
+                       'FOXP1 Syndrome',
+                       'Kleefstra syndrome',
+                       'CHD2 related disorders',
+                       'CACNA1A related disorders',
+                       'Malan Syndrome',
+                       'SYNGAP1 related disorders',
+                       'CASK-Related Disorders',
+                       'HUWE1-related disorders',
+                       'AHC (Alternating Hemiplegia of Childhood)',
+                       'Classic homocystinuria',
+                       '8p-related disorders',
+                       'CHAMP1 related disorders',
+                       'DYRK1A Syndrome',
+                       '4H Leukodystrophy']
 
     # Preprocess training data, then train model.
     input_data, gen = process_raw_data(input_dir)
@@ -183,9 +182,8 @@ def main(input_dir: str = '/input',
         input_data.groupby('Participant_ID')
         .mean()
         .reset_index()
-        .merge(
-            gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name']
-                                      .isin(select_diseases), :]))
+        .merge(gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name']
+                                         .isin(select_diseases), :]))
     imputer, model = train(input_data_df)
 
     # Using trained model, run inference.
@@ -197,10 +195,12 @@ def main(input_dir: str = '/input',
         .reset_index())
     testing_featuresx = imputer.transform(testing_features)
     results = model.predict(testing_featuresx)
-    resultsdf = pd.DataFrame({
+
+    # Output predictions to 2-column TSV.
+    results_df = pd.DataFrame({
         'Participant_ID': testing_features['Participant_ID'].values,
         'Disease_Name': results})
-    resultsdf.to_csv(
+    results_df.to_csv(
         os.path.join(output_dir, "predictions.tsv"),
         sep='\t', index=False)
 
