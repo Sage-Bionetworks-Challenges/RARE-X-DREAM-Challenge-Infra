@@ -37,11 +37,13 @@ def parse_series(X, col):
 
     # Create a pandas DataFrame from the indicator columns
     df = pd.DataFrame(indicator_columns)
-
     return df
 
 
-def process_raw_data(input_dir, diseases):
+def process_raw_data(input_dir):
+    """Clean and parse for specific data from raw data."""
+
+    # Concatenate all files into single dataframe.
     dfs = {}
     gen = {}
     for tsv in glob.glob(os.path.join(input_dir, "*")):
@@ -53,6 +55,8 @@ def process_raw_data(input_dir, diseases):
         if df.Participant_ID.isna().any():
             print(tsv, df.shape,)
     X = pd.concat(dfs, axis=0, ignore_index=True)
+
+    # Drop unneeded/irrelevant columns.
     X.drop(columns=['Last_Updated_Date_UTC',
                     'Last_Updated_Time_UTC',
                     'Racial_Heritages',
@@ -73,6 +77,8 @@ def process_raw_data(input_dir, diseases):
                     'Genetic_Testing_Reason'],
            inplace=True)
     X.drop(columns=X.filter(regex='comment_Curated').columns, inplace=True)
+
+    # Additionally drop columns with low-variance.
     het_cols = []
     low_var = []
     for xc in X.columns:
@@ -82,9 +88,7 @@ def process_raw_data(input_dir, diseases):
             het_cols.append(xc)
     X.drop(columns=low_var, inplace=True)
 
-    X.drop(columns=low_var, inplace=True)  # Delete low-variance cols
-
-    # take multi input string columns and expand to one-hot encoded columns
+    # Expand columns with stringlist values to one-hot encoded columns.
     ohx = []
     for ht in het_cols:
         ohx.append(parse_series(X, ht))
@@ -128,8 +132,13 @@ def process_raw_data(input_dir, diseases):
 
 
 def train(df):
-        gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name'].isin(diseases), :])
+    """Train model by using TPOT pipeline.
 
+    Pipeline:
+        - add/remove features
+        - impute missing values
+        - apply other transforms
+    """
     # NOTE: Make sure that the outcome column is labeled 'target' in the data file
     features = df.drop('Disease_Name', axis=1)
     training_features, testing_features, training_target, testing_target = \
@@ -155,6 +164,7 @@ def train(df):
 def main(input_dir: str = '/input',
          test_dir: str = '/test',
          output_dir: str = '/output'):
+    """Main function."""
     select_diseases = [
         'Wiedemann-Steiner Syndrome (WSS)',
         'STXBP1 related Disorders',
