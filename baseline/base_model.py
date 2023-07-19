@@ -29,8 +29,11 @@ def parse_series(X, col):
     # Create indicator columns for each unique value
     for value in unique_values:
         if value:
-            indicator_columns[col+':'+value] = [1 if value in str(
-                v) else np.nan if pd.isna(v) else 0 for v in series]
+            indicator_columns[col + ':' + value] = [
+                1 if value in str(v)
+                else np.nan if pd.isna(v) else 0
+                for v in series
+            ]
 
     # Create a pandas DataFrame from the indicator columns
     df = pd.DataFrame(indicator_columns)
@@ -69,6 +72,7 @@ def process_raw_data(input_dir, diseases):
                     'Physician_Tests',
                     'Genetic_Testing_Reason'],
            inplace=True)
+    X.drop(columns=X.filter(regex='comment_Curated').columns, inplace=True)
     het_cols = []
     low_var = []
     for xc in X.columns:
@@ -76,6 +80,7 @@ def process_raw_data(input_dir, diseases):
             low_var.append(xc)
         elif X[xc].apply(type).nunique() > 1:
             het_cols.append(xc)
+    X.drop(columns=low_var, inplace=True)
 
     X.drop(columns=low_var, inplace=True)  # Delete low-variance cols
 
@@ -119,6 +124,8 @@ def process_raw_data(input_dir, diseases):
         for pid in temp.items():
             if pid[1] == 0:
                 XX.loc[XX.Participant_ID == pid[0], pass_through_nos[bp]] = 0
+    return XX, gen
+
 
     df_flat = XX.groupby('Participant_ID').mean().reset_index().merge(
         gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name'].isin(diseases), :])
