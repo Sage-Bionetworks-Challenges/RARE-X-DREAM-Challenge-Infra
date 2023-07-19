@@ -144,7 +144,6 @@ def train(df):
     imputer = SimpleImputer(strategy="median")
     imputer.fit(training_features)
     training_featuresx = imputer.transform(training_features)
-    testing_featuresx = imputer.transform(testing_features)
 
     exported_pipeline = RandomForestClassifier(
         bootstrap=False, criterion="gini", max_features=0.2,
@@ -154,7 +153,6 @@ def train(df):
         setattr(exported_pipeline, 'random_state', 42)
 
     exported_pipeline.fit(training_featuresx, np.ravel(training_target))
-    
     return imputer, exported_pipeline
 
 
