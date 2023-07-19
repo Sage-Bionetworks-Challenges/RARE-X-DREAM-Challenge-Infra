@@ -92,10 +92,10 @@ def process_raw_data(input_dir):
     ohx = []
     for ht in het_cols:
         ohx.append(parse_series(X, ht))
-    # add back to main table
     XX = pd.concat([X, *ohx], axis=1)
     XX.drop(columns=het_cols, inplace=True)
 
+    pass_through_nos = {}
     L2_surveys = {
         'Issue_Skin': 'Skin.tsv',
         'Issue_Teeth_Mouth': 'Oral_Health.tsv',
@@ -116,13 +116,11 @@ def process_raw_data(input_dir):
         'Issue_Bones': 'Bone_Cartilage_Connective_Tissue.tsv',
         'Issue_Blood': 'Blood_Bleeding.tsv',
         'Issue_Behavior_Psych': 'Behavior.tsv'}
-
-    pass_through_nos = {}
     for k, s in L2_surveys.items():
         pass_through_nos[k] = dfs[s].filter(
             like='_Symptom_Present').columns.values.tolist()
 
-    # pass through "no" values from L1 Health and Development survey to L2 fields
+    # Pass through "no" values from L1 Health and Development survey to L2 fields
     for bp in pass_through_nos:
         temp = XX.groupby('Participant_ID')[bp].mean()
         for pid in temp.items():
@@ -195,7 +193,7 @@ def main(input_dir: str = '/input',
     # Using trained model, run inference.
     test_data, *_ = process_raw_data(test_dir)
     testing_features = (
-        test_data.reindex(columns=test_data.columns)
+        test_data.reindex(columns=input_data.columns)
         .groupby('Participant_ID')
         .mean()
         .reset_index())
