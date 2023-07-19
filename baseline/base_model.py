@@ -127,38 +127,13 @@ def process_raw_data(input_dir, diseases):
     return XX, gen
 
 
-    df_flat = XX.groupby('Participant_ID').mean().reset_index().merge(
+def train(df):
         gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name'].isin(diseases), :])
 
     # NOTE: Make sure that the outcome column is labeled 'target' in the data file
-    tpot_data = df_flat
-    features = tpot_data.drop('Disease_Name', axis=1)
-    training_features, testing_features, training_target, _ = \
-        train_test_split(features, tpot_data['Disease_Name'], random_state=0)
-
-    dir_list = "tmp", "test"
-    
-    for name in dir_list:
-        os.makedirs(name, exist_ok=True)
-
-    training_features.to_csv(
-        'tmp/training_features.tsv', sep='\t', index=False)
-    testing_features.to_csv('test/testing_features.tsv', sep='\t', index=False)
-    pd.DataFrame({'Participant_ID': training_features['Participant_ID'].values, 'Disease_Name': training_target}).to_csv(
-        'tmp/training_target.tsv', sep='\t', index=False)
-
-
-def predict():
-    training_features = pd.read_table('tmp/training_features.tsv')
-    testing_features = pd.read_table('test/testing_features.tsv')
-    training_target = pd.read_table(
-        'tmp/training_target.tsv')['Disease_Name'].values
-
-    # training pipeline exported from TPOT:
-
-    # add/remove features
-    # impute missing values
-    # apply other transforms
+    features = df.drop('Disease_Name', axis=1)
+    training_features, testing_features, training_target, testing_target = \
+        train_test_split(features, df['Disease_Name'], random_state=0)
 
     imputer = SimpleImputer(strategy="median")
     imputer.fit(training_features)
@@ -173,7 +148,8 @@ def predict():
         setattr(exported_pipeline, 'random_state', 42)
 
     exported_pipeline.fit(training_featuresx, np.ravel(training_target))
-    return exported_pipeline.predict(testing_featuresx), testing_features
+    exported_pipeline.predict(testing_featuresx)
+    return imputer, exported_pipeline
 
 
 def main(input_dir: str = '/input',
