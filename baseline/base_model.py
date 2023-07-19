@@ -154,7 +154,7 @@ def train(df):
         setattr(exported_pipeline, 'random_state', 42)
 
     exported_pipeline.fit(training_featuresx, np.ravel(training_target))
-    exported_pipeline.predict(testing_featuresx)
+    
     return imputer, exported_pipeline
 
 
