@@ -187,7 +187,9 @@ def main(input_dir: str = '/input',
         input_data.groupby('Participant_ID')
         .mean()
         .reset_index()
-        .merge(gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name'].isin(select_diseases), :]))
+        .merge(
+            gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name']
+                                      .isin(select_diseases), :]))
     imputer, model = train(input_data_df)
 
     # Using trained model, run inference.
