@@ -138,8 +138,8 @@ def train(df):
         - apply other transforms
     """
     # NOTE: Make sure that the outcome column is labeled 'target' in the data file
-    features = df.drop('Disease_Name', axis=1)
-    training_features, training_target = features, df['Disease_Name']
+    training_features = df.drop('Disease_Name', axis=1)
+    training_target = df['Disease_Name']
 
     imputer = SimpleImputer(strategy="median")
     imputer.fit(training_features)
