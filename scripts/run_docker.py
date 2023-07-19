@@ -126,8 +126,8 @@ def main(syn, args):
     # These are the volumes that you want to mount onto your docker container
     #output_dir = os.path.join(os.getcwd(), "output")
     output_dir = os.getcwd()
-    input_dir = args.input_dir + '/training1_out'
-    vldtn_dir = args.input_dir + '/validation1_out'
+    input_dir = os.path.join(args.input_dir, 'training1_out')
+    vldtn_dir = os.path.join(args.input_dir, 'validation1_out')
 
     print("mounting volumes")
     # These are the locations on the docker that you want your mounted
