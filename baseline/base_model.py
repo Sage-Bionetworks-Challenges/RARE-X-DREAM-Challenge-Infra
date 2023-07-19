@@ -170,12 +170,33 @@ def main(input_dir: str = '/input',
         'Classic homocystinuria',
         '8p-related disorders',
         'CHAMP1 related disorders',
-        'DYRK1A Syndrome', '4H Leukodystrophy']
-    process_raw_data(input_dir, select_diseases)
-    results, testing_features = predict()
-    resultsdf = pd.DataFrame(
-        {'Participant_ID': testing_features['Participant_ID'].values, 'Disease_Name': results})
-    resultsdf.to_csv(os.path.join(output_dir, "predictions.tsv"), sep='\t', index=False)
+        'DYRK1A Syndrome',
+        '4H Leukodystrophy']
+
+    # Preprocess training data, then train model.
+    input_data, gen = process_raw_data(input_dir)
+    input_data_df = (
+        input_data.groupby('Participant_ID')
+        .mean()
+        .reset_index()
+        .merge(gen['Disease_ID.tsv'].loc[gen['Disease_ID.tsv']['Disease_Name'].isin(select_diseases), :]))
+    imputer, model = train(input_data_df)
+
+    # Using trained model, run inference.
+    test_data, *_ = process_raw_data(test_dir)
+    testing_features = (
+        test_data.reindex(columns=test_data.columns)
+        .groupby('Participant_ID')
+        .mean()
+        .reset_index())
+    testing_featuresx = imputer.transform(testing_features)
+    results = model.predict(testing_featuresx)
+    resultsdf = pd.DataFrame({
+        'Participant_ID': testing_features['Participant_ID'].values,
+        'Disease_Name': results})
+    resultsdf.to_csv(
+        os.path.join(output_dir, "predictions.tsv"),
+        sep='\t', index=False)
 
 
 if __name__ == "__main__":
