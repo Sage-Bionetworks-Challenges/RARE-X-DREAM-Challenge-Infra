@@ -30,8 +30,7 @@ def check_dups(pred):
     duplicates = pred.duplicated(subset=[INDEX_COL])
     if duplicates.any():
         return (
-            f"Found {duplicates.sum()} duplicate participant ID(s): "
-            f"{pred[duplicates].Participant_ID.to_list()}"
+            f"Found {duplicates.sum()} duplicate participant ID(s)."
         )
     return ""
 
@@ -42,8 +41,7 @@ def check_missing_ids(gold, pred):
     missing_ids = gold.index.difference(pred.index)
     if missing_ids.any():
         return (
-            f"Found {missing_ids.shape[0]} missing participant ID(s): "
-            f"{missing_ids.to_list()}"
+            f"Found {missing_ids.shape[0]} missing participant ID(s)."
         )
     return ""
 
@@ -54,8 +52,7 @@ def check_unknown_ids(gold, pred):
     unknown_ids = pred.index.difference(gold.index)
     if unknown_ids.any():
         return (
-            f"Found {unknown_ids.shape[0]} unknown participant ID(s): "
-            f"{unknown_ids.to_list()}"
+            f"Found {unknown_ids.shape[0]} unknown participant ID(s)."
         )
     return ""
 
