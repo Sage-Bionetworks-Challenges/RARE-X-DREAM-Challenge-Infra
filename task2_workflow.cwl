@@ -186,11 +186,11 @@ steps:
       - id: status
         source: "#validate_docker/status"
       - id: parentid
-        source: "#submitterUploadSynId"
+        source: "#adminUploadSynId"
       - id: synapse_config
         source: "#synapseConfig"
       - id: store
-        default: false
+        default: true
       - id: input_dir
         valueFrom: "/home/ec2-user/grnd_trth"
       - id: docker_script
