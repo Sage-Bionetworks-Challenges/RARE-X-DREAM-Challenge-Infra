@@ -59,7 +59,23 @@ requirements:
   - class: InlineJavascriptRequirement
 
 outputs:
-  predictions:
-    type: File
-    outputBinding:
-      glob: predictions.tsv
+- id: predictions
+  type: File?
+  outputBinding:
+    glob: predictions.tsv
+- id: results
+  type: File
+  outputBinding:
+    glob: results.json
+- id: status
+  type: string
+  outputBinding:
+    glob: results.json
+    outputEval: $(JSON.parse(self[0].contents)['submission_status'])
+    loadContents: true
+- id: invalid_reasons
+  type: string
+  outputBinding:
+    glob: results.json
+    outputEval: $(JSON.parse(self[0].contents)['submission_errors'])
+    loadContents: true

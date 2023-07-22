@@ -5,6 +5,7 @@ import getpass
 import os
 import tarfile
 import time
+import json
 
 import docker
 import synapseclient
@@ -199,19 +200,23 @@ def main(syn, args):
         store_log_file(syn, log_filename, args.parentid, store=args.store)
 
     print("finished training")
-    # Try to remove the image
     remove_docker_image(docker_image)
 
     output_folder = os.listdir(output_dir)
-    if not output_folder:
-        raise Exception("No 'predictions.tsv' file written to /output, "
-                        "please check inference docker")
-    elif "predictions.tsv" not in output_folder:
-        raise Exception("No 'predictions.tsv' file written to /output, "
-                        "please check inference docker")
-    # CWL has a limit of the array of files it can accept in a folder
-    # therefore creating a tarball is sometimes necessary
-    # tar(output_dir, 'outputs.tar.gz')
+    if not output_folder or "predictions.tsv" not in output_folder:
+        status = "INVALID"
+        errors = ("Error encountered while running your Docker container; logs cannot "
+                  "be shared for this challenge, so please contact the organizers in "
+                  "the Discussion Forum for help.")
+    else:
+        status = "PREDICTIONS_GENERATED"
+        errors = ""
+    with open("results.json", "w") as out:
+        out.write(json.dumps({
+            'submission_status': status,
+            'submission_errors': errors,
+            'admin_folder': args.parentid
+        }))
 
 
 if __name__ == '__main__':
