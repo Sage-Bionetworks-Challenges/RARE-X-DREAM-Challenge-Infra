@@ -98,7 +98,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "syn52069273"
+        valueFrom: "syn52069274"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -192,7 +192,7 @@ steps:
       - id: store
         default: true
       - id: input_dir
-        valueFrom: "/home/ec2-user/grnd_trth"
+        valueFrom: "/home/ec2-user/final_round"
       - id: docker_script
         default:
           class: File
