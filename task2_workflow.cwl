@@ -384,8 +384,8 @@ steps:
       - id: results
         source: "#score/results"
       # OPTIONAL: add annotations to be withheld from participants to `[]`
-      # - id: private_annotations
-      #   default: []
+      - id: private_annotations
+        default: ["accuracy"]
     out: []
 
   annotate_submission_with_output:
