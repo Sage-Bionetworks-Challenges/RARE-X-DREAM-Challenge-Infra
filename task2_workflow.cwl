@@ -192,7 +192,7 @@ steps:
       - id: store
         default: true
       - id: input_dir
-        valueFrom: "/home/ec2-user/final_round"
+        valueFrom: "/home/ec2-user/final_round/input"
       - id: docker_script
         default:
           class: File
